@@ -18,6 +18,7 @@ type Product struct {
 
 type Order struct {
 	ID            int64      `db:"id"`
+	UserID        int64      `db:"user_id"`
 	PaymentMethod string     `db:"payment_method"`
 	TaxPrice      float64    `db:"tax_price"`
 	ShippingPrice float64    `db:"shipping_price"`
