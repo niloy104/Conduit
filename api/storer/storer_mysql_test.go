@@ -153,12 +153,12 @@ func TestGetProduct(t *testing.T) {
 }
 
 func TestListProducts(t *testing.T) {
-	products := []*Product{
+	products := []Product{
 		{
 			ID:           1,
 			Name:         "test Product 1",
 			Image:        "test1.jpg",
-			Category:     "test Category",
+			Category:     "test Category 1",
 			Description:  "this is a test product 1",
 			Rating:       5,
 			NumReviews:   10,
@@ -170,11 +170,11 @@ func TestListProducts(t *testing.T) {
 			ID:           2,
 			Name:         "test Product 2",
 			Image:        "test2.jpg",
-			Category:     "test Category",
+			Category:     "test Category 2",
 			Description:  "this is a test product 2",
 			Rating:       4,
-			NumReviews:   20,
-			Price:        79.99,
+			NumReviews:   5,
+			Price:        49.99,
 			CountInStock: 30,
 			CreatedAt:    time.Now(),
 		},
@@ -187,13 +187,11 @@ func TestListProducts(t *testing.T) {
 		{
 			name: "success",
 			test: func(t *testing.T, st *MySQLStorer, mock sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"id", "name", "image", "category", "description", "rating", "num_reviews", "price", "count_in_stock", "created_at", "updated_at"})
-				for _, p := range products {
-					rows.AddRow(p.ID, p.Name, p.Image, p.Category, p.Description, p.Rating, p.NumReviews, p.Price, p.CountInStock, p.CreatedAt, nil)
-				}
+				rows := sqlmock.NewRows([]string{"id", "name", "image", "category", "description", "rating", "num_reviews", "price", "count_in_stock", "created_at", "updated_at"}).
+					AddRow(products[0].ID, products[0].Name, products[0].Image, products[0].Category, products[0].Description, products[0].Rating, products[0].NumReviews, products[0].Price, products[0].CountInStock, products[0].CreatedAt, nil).
+					AddRow(products[1].ID, products[1].Name, products[1].Image, products[1].Category, products[1].Description, products[1].Rating, products[1].NumReviews, products[1].Price, products[1].CountInStock, products[1].CreatedAt, nil)
 
-				mock.ExpectQuery("SELECT * FROM products").
-					WillReturnRows(rows)
+				mock.ExpectQuery("SELECT * FROM products").WillReturnRows(rows)
 
 				ps, err := st.ListProducts(context.Background())
 				require.NoError(t, err)
@@ -205,8 +203,7 @@ func TestListProducts(t *testing.T) {
 		{
 			name: "list error",
 			test: func(t *testing.T, st *MySQLStorer, mock sqlmock.Sqlmock) {
-				mock.ExpectQuery("SELECT * FROM products").
-					WillReturnError(sqlmock.ErrCancelled)
+				mock.ExpectQuery("SELECT * FROM products").WillReturnError(sqlmock.ErrCancelled)
 
 				ps, err := st.ListProducts(context.Background())
 				require.Error(t, err)
@@ -350,6 +347,7 @@ func TestCreateOrder(t *testing.T) {
 	}
 
 	o := &Order{
+		UserID:        1, // <- make sure to set a userID here
 		PaymentMethod: "test payment method",
 		TaxPrice:      10.0,
 		ShippingPrice: 20.0,
@@ -365,60 +363,72 @@ func TestCreateOrder(t *testing.T) {
 			name: "success",
 			test: func(t *testing.T, st *MySQLStorer, mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec("INSERT INTO orders (payment_method, tax_price, shipping_price, total_price, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)").
-					WithArgs(o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
+				mock.ExpectExec(`INSERT INTO orders\s*\(\s*user_id\s*,\s*payment_method\s*,\s*tax_price\s*,\s*shipping_price\s*,\s*total_price\s*,\s*created_at\s*,\s*updated_at\s*\)\s*VALUES\s*\(\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*\)`).
+					WithArgs(o.UserID, o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				for _, oi := range o.Items {
-					mock.ExpectExec("INSERT INTO order_items (name, quantity, image, price, product_id, order_id) VALUES (?, ?, ?, ?, ?, ?)").
-						WithArgs(oi.Name, oi.Quantity, oi.Image, oi.Price, oi.ProductID, 1).
-						WillReturnResult(sqlmock.NewResult(1, 1))
-				}
+				mock.ExpectExec(`INSERT INTO order_items\s*\(\s*name\s*,\s*quantity\s*,\s*image\s*,\s*price\s*,\s*product_id\s*,\s*order_id\s*\)\s*VALUES\s*\(\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*\)`).
+					WithArgs(o.Items[0].Name, o.Items[0].Quantity, o.Items[0].Image, o.Items[0].Price, o.Items[0].ProductID, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				mock.ExpectExec(`INSERT INTO order_items\s*\(\s*name\s*,\s*quantity\s*,\s*image\s*,\s*price\s*,\s*product_id\s*,\s*order_id\s*\)\s*VALUES\s*\(\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*,\s*\?\s*\)`).
+					WithArgs(o.Items[1].Name, o.Items[1].Quantity, o.Items[1].Image, o.Items[1].Price, o.Items[1].ProductID, 1).
+					WillReturnResult(sqlmock.NewResult(2, 1))
 
 				mock.ExpectCommit()
 
-				no, err := st.CreateOrder(context.Background(), o)
+				mo, err := st.CreateOrder(context.Background(), o)
 				require.NoError(t, err)
-				require.Equal(t, o, no)
+				require.Equal(t, int64(1), mo.ID)
+
 				err = mock.ExpectationsWereMet()
 				require.NoError(t, err)
 			},
 		},
 		{
-			name: "failed creating order",
+			name: "failed inserting order",
 			test: func(t *testing.T, st *MySQLStorer, mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec("INSERT INTO orders (payment_method, tax_price, shipping_price, total_price, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)").
-					WithArgs(o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
+
+				mock.ExpectExec(
+					"INSERT INTO orders \\(\\s*user_id, payment_method, tax_price, shipping_price, total_price, created_at, updated_at\\s*\\) VALUES \\(\\?, \\?, \\?, \\?, \\?, \\?, \\?\\)",
+				).
+					WithArgs(o.UserID, o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
 					WillReturnError(fmt.Errorf("error inserting order"))
+
 				mock.ExpectRollback()
-		
-				mo, err := st.CreateOrder(context.Background(), o)
+
+				_, err := st.CreateOrder(context.Background(), o)
 				require.Error(t, err)
-				require.Nil(t, mo)
+
 				err = mock.ExpectationsWereMet()
 				require.NoError(t, err)
 			},
 		},
 		{
-			name: "failed creating order item",
+			name: "failed inserting order item",
 			test: func(t *testing.T, st *MySQLStorer, mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec("INSERT INTO orders (payment_method, tax_price, shipping_price, total_price, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)").
-					WithArgs(o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
+
+				mock.ExpectExec(
+					"INSERT INTO orders \\(\\s*user_id, payment_method, tax_price, shipping_price, total_price, created_at, updated_at\\s*\\) VALUES \\(\\?, \\?, \\?, \\?, \\?, \\?, \\?\\)",
+				).
+					WithArgs(o.UserID, o.PaymentMethod, o.TaxPrice, o.ShippingPrice, o.TotalPrice, sqlmock.AnyArg(), nil).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-
-				mock.ExpectExec("INSERT INTO order_items (name, quantity, image, price, product_id, order_id) VALUES (?, ?, ?, ?, ?, ?)").
+				mock.ExpectExec(
+					"INSERT INTO order_items \\(\\s*name, quantity, image, price, product_id, order_id\\s*\\) VALUES \\(\\?, \\?, \\?, \\?, \\?, \\?\\)",
+				).
 					WithArgs(o.Items[0].Name, o.Items[0].Quantity, o.Items[0].Image, o.Items[0].Price, o.Items[0].ProductID, 1).
-					WillReturnError(fmt.Errorf("error inserting order item"))
-
+					WillReturnError(fmt.Errorf("error inserting order item"))	
 				mock.ExpectRollback()
 
-				mo, err := st.CreateOrder(context.Background(), o)
+				_, err := st.CreateOrder(context.Background(), o)
 				require.Error(t, err)
-				require.Nil(t, mo)
+
+				err = mock.ExpectationsWereMet()
+				require.NoError(t, err)
 			},
-		},			
+		},
 	}
 
 	for _, tc := range tcs {
@@ -427,7 +437,6 @@ func TestCreateOrder(t *testing.T) {
 			tc.test(t, st, mock)
 		})
 	}
-
 }
 
 func TestGetOrder(t *testing.T) {
@@ -525,7 +534,6 @@ func TestGetOrder(t *testing.T) {
 		})
 	}
 }
-
 
 func TestListOrders(t *testing.T) {
 	ois := []OrderItem{
