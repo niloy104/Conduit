@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Database struct {
@@ -17,7 +19,6 @@ func NewDatabase() (*Database, error) {
 	}
 	return &Database{db: db}, nil
 }
-
 
 func (d *Database) Close() error {
 	return d.db.Close()
