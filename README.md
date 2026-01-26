@@ -1,6 +1,6 @@
 # Conduit (E-Commerce Microservices Platform)
 
-> Status: 🚧 Early development
+> Status: 🚧 60% development complete
 
 ## Overview
 
