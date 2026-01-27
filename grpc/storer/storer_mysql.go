@@ -18,18 +18,17 @@ func NewMySQLStorer(db *sqlx.DB) *MySQLStorer {
 }
 
 func (ms *MySQLStorer) CreateProduct(ctx context.Context, p *Product) (*Product, error) {
-	res, err := ms.db.NamedExecContext(ctx, `INSERT INTO products (name, image, category, description, rating, num_reviews, price, count_in_stock, created_at, updated_at)
-		VALUES (:name, :image, :category, :description, :rating, :num_reviews, :price, :count_in_stock, :created_at, :updated_at)`, p)
-
+	res, err := ms.db.NamedExecContext(ctx, "INSERT INTO products (name, image, category, description, rating, num_reviews, price, count_in_stock) VALUES (:name, :image, :category, :description, :rating, :num_reviews, :price, :count_in_stock)", p)
 	if err != nil {
 		return nil, fmt.Errorf("error inserting product: %w", err)
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, fmt.Errorf("error getting last insert id: %w", err)
+		return nil, fmt.Errorf("error getting last insert ID: %w", err)
 	}
 	p.ID = id
+
 	return p, nil
 }
 
@@ -42,8 +41,8 @@ func (ms *MySQLStorer) GetProduct(ctx context.Context, id int64) (*Product, erro
 	return &p, nil
 }
 
-func (ms *MySQLStorer) ListProducts(ctx context.Context) ([]Product, error) {
-	var products []Product
+func (ms *MySQLStorer) ListProducts(ctx context.Context) ([]*Product, error) {
+	var products []*Product
 	err := ms.db.SelectContext(ctx, &products, "SELECT * FROM products")
 	if err != nil {
 		return nil, fmt.Errorf("error listing products: %w", err)
@@ -96,36 +95,17 @@ func (ms *MySQLStorer) CreateOrder(ctx context.Context, o *Order) (*Order, error
 }
 
 func createOrder(ctx context.Context, tx *sqlx.Tx, o *Order) (*Order, error) {
-	res, err := tx.NamedExecContext(ctx, `
-		INSERT INTO orders (
-			user_id,
-			payment_method,
-			tax_price,
-			shipping_price,
-			total_price,
-			created_at,
-			updated_at
-		)
-		VALUES (
-			:user_id,
-			:payment_method,
-			:tax_price,
-			:shipping_price,
-			:total_price,
-			:created_at,
-			:updated_at
-		)
-	`, o)
+	res, err := tx.NamedExecContext(ctx, "INSERT INTO orders (payment_method, tax_price, shipping_price, total_price, user_id) VALUES (:payment_method, :tax_price, :shipping_price, :total_price, :user_id)", o)
 	if err != nil {
 		return nil, fmt.Errorf("error inserting order: %w", err)
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, fmt.Errorf("error getting last insert id for order: %w", err)
+		return nil, fmt.Errorf("error getting last insert ID: %w", err)
 	}
-
 	o.ID = id
+
 	return o, nil
 }
 
@@ -256,8 +236,8 @@ func (ms *MySQLStorer) GetUser(ctx context.Context, email string) (*User, error)
 	return &u, nil
 }
 
-func (ms *MySQLStorer) ListUsers(ctx context.Context) ([]User, error) {
-	var users []User
+func (ms *MySQLStorer) ListUsers(ctx context.Context) ([]*User, error) {
+	var users []*User
 	err := ms.db.SelectContext(ctx, &users, "SELECT * FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("error listing users: %w", err)
