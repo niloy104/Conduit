@@ -14,7 +14,7 @@ import (
 func main() {
 	var (
 		svcAddr    = envflag.String("GRPC_SVC_ADDR", "0.0.0.0:9091", "address where the ecomm-grpc service is listening on")
-		adminEmail = envflag.String("ADMIN_EMAIL", "your_email", "admin email")
+		adminEmail = envflag.String("ADMIN_EMAIL", "manzurul104@gmail.com", "admin email")
 		adminPass  = envflag.String("ADMIN_PASSWORD", "", "admin email")
 	)
 	envflag.Parse()

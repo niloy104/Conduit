@@ -1,0 +1,53 @@
+networks:
+  conduit:
+    driver: bridge
+services:
+  mysql:
+    networks:
+      - conduit
+    platform: linux/amd64
+    image: mysql:8.4
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ecomm
+  grpc:
+    networks:
+      - conduit
+    hostname: grpc
+    platform: linux/amd64
+    image: niloy104.test/conduit:latest
+    command: "/bin/grpc"
+    ports:
+      - "9091:9091"
+    environment:
+      DB_ADDR: "mysql:3306"
+    depends_on:
+      - mysql
+  api:
+    networks:
+      - conduit
+    hostname: api
+    platform: linux/amd64
+    image: niloy104.test/conduit:latest
+    command: "/bin/api"
+    ports:
+      - "8080:8080"
+    environment:
+      GRPC_SVC_ADDR: "grpc:9091"
+    depends_on:
+      - grpc
+  ecomm-notification:
+    networks:
+      - conduit
+    hostname: ecomm-notification
+    platform: linux/amd64
+    image: niloy104.test/conduit:latest
+    command: "/bin/notification"
+    environment:
+      ADMIN_EMAIL: ""
+      ADMIN_PASSWORD: ""
+      GRPC_SVC_ADDR: "grpc:9091"
+    depends_on:
+      - grpc
