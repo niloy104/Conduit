@@ -17,6 +17,7 @@ func main() {
 		secretKey = envflag.String("SECRET_kEY", "01234567890123456789012345678901", "secret key for jwt signing")
 		svcAddr   = envflag.String("GRPC_SVC_ADDR", "0.0.0.0:9091", "address where the grpc service is listening on")
 	)
+	envflag.Parse()
 
 	if len(*secretKey) < minSecretKeySize {
 		log.Fatalf("SECRET_KEY must me at leas %d charachter", minSecretKeySize)

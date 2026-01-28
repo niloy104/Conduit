@@ -19,25 +19,27 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Ecomm_CreateProduct_FullMethodName     = "/pb.ecomm/CreateProduct"
-	Ecomm_GetProduct_FullMethodName        = "/pb.ecomm/GetProduct"
-	Ecomm_ListProducts_FullMethodName      = "/pb.ecomm/ListProducts"
-	Ecomm_UpdateProduct_FullMethodName     = "/pb.ecomm/UpdateProduct"
-	Ecomm_DeleteProduct_FullMethodName     = "/pb.ecomm/DeleteProduct"
-	Ecomm_CreateOrder_FullMethodName       = "/pb.ecomm/CreateOrder"
-	Ecomm_GetOrder_FullMethodName          = "/pb.ecomm/GetOrder"
-	Ecomm_ListOrders_FullMethodName        = "/pb.ecomm/ListOrders"
-	Ecomm_UpdateOrderStatus_FullMethodName = "/pb.ecomm/UpdateOrderStatus"
-	Ecomm_DeleteOrder_FullMethodName       = "/pb.ecomm/DeleteOrder"
-	Ecomm_CreateUser_FullMethodName        = "/pb.ecomm/CreateUser"
-	Ecomm_GetUser_FullMethodName           = "/pb.ecomm/GetUser"
-	Ecomm_ListUsers_FullMethodName         = "/pb.ecomm/ListUsers"
-	Ecomm_UpdateUser_FullMethodName        = "/pb.ecomm/UpdateUser"
-	Ecomm_DeleteUser_FullMethodName        = "/pb.ecomm/DeleteUser"
-	Ecomm_CreateSession_FullMethodName     = "/pb.ecomm/CreateSession"
-	Ecomm_GetSession_FullMethodName        = "/pb.ecomm/GetSession"
-	Ecomm_RevokeSession_FullMethodName     = "/pb.ecomm/RevokeSession"
-	Ecomm_DeleteSession_FullMethodName     = "/pb.ecomm/DeleteSession"
+	Ecomm_CreateProduct_FullMethodName           = "/pb.ecomm/CreateProduct"
+	Ecomm_GetProduct_FullMethodName              = "/pb.ecomm/GetProduct"
+	Ecomm_ListProducts_FullMethodName            = "/pb.ecomm/ListProducts"
+	Ecomm_UpdateProduct_FullMethodName           = "/pb.ecomm/UpdateProduct"
+	Ecomm_DeleteProduct_FullMethodName           = "/pb.ecomm/DeleteProduct"
+	Ecomm_CreateOrder_FullMethodName             = "/pb.ecomm/CreateOrder"
+	Ecomm_GetOrder_FullMethodName                = "/pb.ecomm/GetOrder"
+	Ecomm_ListOrders_FullMethodName              = "/pb.ecomm/ListOrders"
+	Ecomm_UpdateOrderStatus_FullMethodName       = "/pb.ecomm/UpdateOrderStatus"
+	Ecomm_DeleteOrder_FullMethodName             = "/pb.ecomm/DeleteOrder"
+	Ecomm_CreateUser_FullMethodName              = "/pb.ecomm/CreateUser"
+	Ecomm_GetUser_FullMethodName                 = "/pb.ecomm/GetUser"
+	Ecomm_ListUsers_FullMethodName               = "/pb.ecomm/ListUsers"
+	Ecomm_UpdateUser_FullMethodName              = "/pb.ecomm/UpdateUser"
+	Ecomm_DeleteUser_FullMethodName              = "/pb.ecomm/DeleteUser"
+	Ecomm_CreateSession_FullMethodName           = "/pb.ecomm/CreateSession"
+	Ecomm_GetSession_FullMethodName              = "/pb.ecomm/GetSession"
+	Ecomm_RevokeSession_FullMethodName           = "/pb.ecomm/RevokeSession"
+	Ecomm_DeleteSession_FullMethodName           = "/pb.ecomm/DeleteSession"
+	Ecomm_ListNotificationEvents_FullMethodName  = "/pb.ecomm/ListNotificationEvents"
+	Ecomm_UpdateNotificationEvent_FullMethodName = "/pb.ecomm/UpdateNotificationEvent"
 )
 
 // EcommClient is the client API for Ecomm service.
@@ -63,6 +65,8 @@ type EcommClient interface {
 	GetSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
 	RevokeSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
 	DeleteSession(ctx context.Context, in *SessionReq, opts ...grpc.CallOption) (*SessionRes, error)
+	ListNotificationEvents(ctx context.Context, in *ListNotificationEventsReq, opts ...grpc.CallOption) (*ListNotificationEventsRes, error)
+	UpdateNotificationEvent(ctx context.Context, in *UpdateNotificationEventReq, opts ...grpc.CallOption) (*UpdateNotificationEventRes, error)
 }
 
 type ecommClient struct {
@@ -263,6 +267,26 @@ func (c *ecommClient) DeleteSession(ctx context.Context, in *SessionReq, opts ..
 	return out, nil
 }
 
+func (c *ecommClient) ListNotificationEvents(ctx context.Context, in *ListNotificationEventsReq, opts ...grpc.CallOption) (*ListNotificationEventsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNotificationEventsRes)
+	err := c.cc.Invoke(ctx, Ecomm_ListNotificationEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ecommClient) UpdateNotificationEvent(ctx context.Context, in *UpdateNotificationEventReq, opts ...grpc.CallOption) (*UpdateNotificationEventRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateNotificationEventRes)
+	err := c.cc.Invoke(ctx, Ecomm_UpdateNotificationEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EcommServer is the server API for Ecomm service.
 // All implementations must embed UnimplementedEcommServer
 // for forward compatibility.
@@ -286,6 +310,8 @@ type EcommServer interface {
 	GetSession(context.Context, *SessionReq) (*SessionRes, error)
 	RevokeSession(context.Context, *SessionReq) (*SessionRes, error)
 	DeleteSession(context.Context, *SessionReq) (*SessionRes, error)
+	ListNotificationEvents(context.Context, *ListNotificationEventsReq) (*ListNotificationEventsRes, error)
+	UpdateNotificationEvent(context.Context, *UpdateNotificationEventReq) (*UpdateNotificationEventRes, error)
 	mustEmbedUnimplementedEcommServer()
 }
 
@@ -352,6 +378,12 @@ func (UnimplementedEcommServer) RevokeSession(context.Context, *SessionReq) (*Se
 }
 func (UnimplementedEcommServer) DeleteSession(context.Context, *SessionReq) (*SessionRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteSession not implemented")
+}
+func (UnimplementedEcommServer) ListNotificationEvents(context.Context, *ListNotificationEventsReq) (*ListNotificationEventsRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListNotificationEvents not implemented")
+}
+func (UnimplementedEcommServer) UpdateNotificationEvent(context.Context, *UpdateNotificationEventReq) (*UpdateNotificationEventRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateNotificationEvent not implemented")
 }
 func (UnimplementedEcommServer) mustEmbedUnimplementedEcommServer() {}
 func (UnimplementedEcommServer) testEmbeddedByValue()               {}
@@ -716,6 +748,42 @@ func _Ecomm_DeleteSession_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ecomm_ListNotificationEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationEventsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EcommServer).ListNotificationEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Ecomm_ListNotificationEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EcommServer).ListNotificationEvents(ctx, req.(*ListNotificationEventsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Ecomm_UpdateNotificationEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateNotificationEventReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EcommServer).UpdateNotificationEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Ecomm_UpdateNotificationEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EcommServer).UpdateNotificationEvent(ctx, req.(*UpdateNotificationEventReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Ecomm_ServiceDesc is the grpc.ServiceDesc for Ecomm service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -798,6 +866,14 @@ var Ecomm_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteSession",
 			Handler:    _Ecomm_DeleteSession_Handler,
+		},
+		{
+			MethodName: "ListNotificationEvents",
+			Handler:    _Ecomm_ListNotificationEvents_Handler,
+		},
+		{
+			MethodName: "UpdateNotificationEvent",
+			Handler:    _Ecomm_UpdateNotificationEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

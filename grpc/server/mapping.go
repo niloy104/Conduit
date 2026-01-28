@@ -98,18 +98,18 @@ func toStorerOrderItems(items []*pb.OrderItem) []storer.OrderItem {
 	return res
 }
 
-// func toPBOrderStatus(os storer.OrderStatus) pb.OrderStatus {
-// 	switch os {
-// 	case storer.Pending:
-// 		return pb.OrderStatus_PENDING
-// 	case storer.Shipped:
-// 		return pb.OrderStatus_SHIPPED
-// 	case storer.Delivered:
-// 		return pb.OrderStatus_DELIVERED
-// 	default:
-// 		return 0
-// 	}
-// }
+func toPBOrderStatus(os storer.OrderStatus) pb.OrderStatus {
+	switch os {
+	case storer.Pending:
+		return pb.OrderStatus_PENDING
+	case storer.Shipped:
+		return pb.OrderStatus_SHIPPED
+	case storer.Delivered:
+		return pb.OrderStatus_DELIVERED
+	default:
+		return 0
+	}
+}
 
 func toPBOrderRes(o *storer.Order) *pb.OrderRes {
 	res := &pb.OrderRes{
@@ -119,8 +119,8 @@ func toPBOrderRes(o *storer.Order) *pb.OrderRes {
 		TaxPrice:      o.TaxPrice,
 		ShippingPrice: o.ShippingPrice,
 		TotalPrice:    o.TotalPrice,
-		// Status:        toPBOrderStatus(o.Status),
-		CreatedAt: timestamppb.New(o.CreatedAt),
+		Status:        toPBOrderStatus(o.Status),
+		CreatedAt:     timestamppb.New(o.CreatedAt),
 	}
 	if o.UpdatedAt != nil {
 		res.UpdatedAt = timestamppb.New(*o.UpdatedAt)

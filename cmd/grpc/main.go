@@ -17,7 +17,9 @@ func main() {
 	var (
 		svcAddr = envflag.String("SVC_ADDR", "0.0.0.0:9091", "address where the grpc service is listening on")
 	)
+	envflag.Parse()
 
+	//instntiate db
 	db, err := db.NewDatabase()
 	if err != nil {
 		log.Fatal("error opening database: %w", err)
