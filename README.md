@@ -43,8 +43,6 @@ Conduit follows industry-proven backend design principles:
 - **Explicit service-to-service communication (REST + gRPC)**
 - **Separation of infrastructure, domain, and application layers**
 
-Focus: **maintainability, scalability, and correctness**.
-
 ---
 
 ## Tech Stack
