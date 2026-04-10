@@ -1,4 +1,4 @@
-# Conduit — E-Commerce Microservices Platform
+# EcomGrid  — E-Commerce Microservices Platform
 
 > Status: ✅ **Production-ready (development complete)**
 
