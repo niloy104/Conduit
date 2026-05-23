@@ -4,7 +4,7 @@
 
 ## Overview
 
-**EcomGrid ** is a fully implemented **e-commerce microservices platform** built with an **architecture-first, backend-driven approach**.
+EcomGrid is a fully implemented **e-commerce microservices platform** built with an **architecture-first, backend-driven approach**.
 
 The system demonstrates modern e-commerce backend design: clear service boundaries, explicit communication contracts, and scalable infrastructure with minimal technical debt.
 
